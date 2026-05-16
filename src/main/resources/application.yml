@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: umanage-backend
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/umanage}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+
+server:
+  port: ${SERVER_PORT:8080}
+
+app:
+  security:
+    cors:
+      allowed-origins:
+        - ${APP_CORS_ALLOWED_ORIGIN:http://localhost:3000}
+    jwt:
+      issuer: ${JWT_ISSUER:umanage}
+      # Default is for local development only. Override in all non-local envs.
+      secret: ${JWT_SECRET:Q2lZTUNUUTVqaDlXWUNvVjNacE00Y0xOb1JnNlN2b3prQ0VPM0E0WkVHekdLQmRuMXZJM2dXQ2h4WlN6SEdubQ==}
+      access-token-expiry-minutes: ${JWT_ACCESS_EXPIRY_MINUTES:30}
+      refresh-token-expiry-days: ${JWT_REFRESH_EXPIRY_DAYS:7}
+  bootstrap:
+    admin:
+      email: ${BOOTSTRAP_ADMIN_EMAIL:admin@umanage.local}
+      password: ${BOOTSTRAP_ADMIN_PASSWORD:T9x!mP7#qL2@vN6$zD4}
