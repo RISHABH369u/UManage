@@ -2,6 +2,7 @@ package com.umanage.common.exception;
 
 import com.umanage.common.api.ApiResponse;
 import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.ConstraintViolation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -41,7 +42,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ApiResponse<Void>> handleConstraintValidation(ConstraintViolationException exception) {
         String message = exception.getConstraintViolations().stream()
-                .map(v -> v.getMessage())
+                .map(ConstraintViolation::getMessage)
                 .collect(Collectors.joining(", "));
         return ResponseEntity.badRequest().body(ApiResponse.fail(message));
     }

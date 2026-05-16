@@ -38,12 +38,7 @@ public class RoleService {
             var permissions = new HashSet<Permission>();
             for (String permissionName : request.permissionNames()) {
                 Permission permission = permissionRepository.findByNameIgnoreCase(permissionName.trim())
-                        .orElseGet(() -> {
-                            var p = new Permission();
-                            p.setName(permissionName.trim().toUpperCase());
-                            p.setDescription("Auto-created permission");
-                            return permissionRepository.save(p);
-                        });
+                        .orElseThrow(() -> new ResourceNotFoundException("Permission not found: " + permissionName.trim()));
                 permissions.add(permission);
             }
             role.setPermissions(permissions);

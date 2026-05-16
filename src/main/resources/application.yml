@@ -23,14 +23,14 @@ app:
   security:
     cors:
       allowed-origins:
-        - ${APP_CORS_ALLOWED_ORIGIN:http://localhost:*}
+        - ${APP_CORS_ALLOWED_ORIGIN:http://localhost:3000}
     jwt:
       issuer: ${JWT_ISSUER:umanage}
       # Default is for local development only. Override in all non-local envs.
-      secret: ${JWT_SECRET:YmFzZTY0LXNlY3JldC1rZXktd2l0aC1lbm91Z2gtbGVuZ3RoLXRvLWJlLXNlY3VyZS0xMjM0NQ==}
+      secret: ${JWT_SECRET:Q2lZTUNUUTVqaDlXWUNvVjNacE00Y0xOb1JnNlN2b3prQ0VPM0E0WkVHekdLQmRuMXZJM2dXQ2h4WlN6SEdubQ==}
       access-token-expiry-minutes: ${JWT_ACCESS_EXPIRY_MINUTES:30}
       refresh-token-expiry-days: ${JWT_REFRESH_EXPIRY_DAYS:7}
   bootstrap:
     admin:
       email: ${BOOTSTRAP_ADMIN_EMAIL:admin@umanage.local}
-      password: ${BOOTSTRAP_ADMIN_PASSWORD:Admin@123}
+      password: ${BOOTSTRAP_ADMIN_PASSWORD:T9x!mP7#qL2@vN6$zD4}
