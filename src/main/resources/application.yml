@@ -21,6 +21,9 @@ server:
 
 app:
   security:
+    cors:
+      allowed-origins:
+        - ${APP_CORS_ALLOWED_ORIGIN:http://localhost:*}
     jwt:
       issuer: ${JWT_ISSUER:umanage}
       # Default is for local development only. Override in all non-local envs.

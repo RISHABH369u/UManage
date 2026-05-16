@@ -1,5 +1,6 @@
 package com.umanage.users.mapper;
 
+import com.umanage.users.entity.Permission;
 import com.umanage.users.dto.RoleResponse;
 import com.umanage.users.dto.UserResponse;
 import com.umanage.users.entity.Role;
@@ -28,7 +29,7 @@ public class UserMapper {
                 role.getId(),
                 role.getName(),
                 role.getDescription(),
-                role.getPermissions().stream().map(permission -> permission.getName()).collect(Collectors.toSet())
+                role.getPermissions().stream().map(Permission::getName).collect(Collectors.toSet())
         );
     }
 }
