@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
+import java.util.stream.StreamSupport;
 
 @Service
 public class AuthService {
@@ -56,11 +57,7 @@ public class AuthService {
         var user = userRepository.findByEmailIgnoreCase(principal.getUsername())
                 .orElseThrow(() -> new UnauthorizedException("Invalid credentials"));
 
-        var scope = principal.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .sorted()
-                .reduce((a, b) -> a + " " + b)
-                .orElse("");
+        var scope = buildScopeFromAuthorities(principal.getAuthorities());
 
         var accessToken = jwtService.generateAccessToken(user.getId(), user.getEmail(), scope);
         var refreshTokenValue = jwtService.generateRefreshToken(user.getId());
@@ -97,13 +94,12 @@ public class AuthService {
         refreshTokenRepository.save(dbToken);
 
         var user = dbToken.getUser();
-        var scope = user.getRoles().stream()
-                .flatMap(role -> role.getPermissions().stream())
-                .map(permission -> permission.getName().toUpperCase())
-                .distinct()
-                .sorted()
-                .reduce((a, b) -> a + " " + b)
-                .orElse("");
+        var scope = buildScopeFromAuthorities(
+                user.getRoles().stream()
+                        .flatMap(role -> role.getPermissions().stream())
+                        .map(permission -> (GrantedAuthority) () -> permission.getName().toUpperCase())
+                        .toList()
+        );
 
         var accessToken = jwtService.generateAccessToken(user.getId(), user.getEmail(), scope);
         var refreshTokenValue = jwtService.generateRefreshToken(user.getId());
@@ -116,5 +112,15 @@ public class AuthService {
 
         auditLogService.log(user.getId(), "REFRESH_TOKEN", "User", user.getId().toString(), "Refreshed access token", httpRequest.getRemoteAddr());
         return new TokenResponse(accessToken, refreshTokenValue, "Bearer", jwtProperties.accessTokenExpiryMinutes() * 60);
+    }
+
+    private String buildScopeFromAuthorities(Iterable<? extends GrantedAuthority> authorities) {
+        return StreamSupport.stream(authorities.spliterator(), false)
+                .map(GrantedAuthority::getAuthority)
+                .filter(authority -> authority != null && !authority.isBlank())
+                .distinct()
+                .sorted()
+                .reduce((a, b) -> a + " " + b)
+                .orElse("");
     }
 }

@@ -12,6 +12,8 @@ import java.util.HashSet;
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
+    private static final String ROLE_PREFIX = "ROLE_";
+
     private final UserRepository userRepository;
 
     public CustomUserDetailsService(UserRepository userRepository) {
@@ -25,7 +27,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         var authorities = new HashSet<SimpleGrantedAuthority>();
         user.getRoles().forEach(role -> {
-            authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName().toUpperCase()));
+            authorities.add(new SimpleGrantedAuthority(ROLE_PREFIX + role.getName()));
             role.getPermissions().forEach(permission ->
                     authorities.add(new SimpleGrantedAuthority(permission.getName().toUpperCase())));
         });
