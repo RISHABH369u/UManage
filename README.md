@@ -20,6 +20,7 @@ Package structure under `src/main/java/com/umanage`:
 - `users`: user/role/permission entities, repositories, services, mapper, controllers
 - `academic`: departments, programs, semesters, courses, offerings/sections, prerequisites, faculty assignments
 - `enrollment`: enrollment requests, approvals/rejections, registrations, student/admin workflows
+- `exam`: exam orchestration domain (scheduling, room/invigilator planning, seat planning, OMR sheet metadata, scan-ready records)
 - `audit`: audit log entity/repository/service
 - `bootstrap`: startup seed for baseline admin + permissions
 
@@ -68,6 +69,8 @@ Package structure under `src/main/java/com/umanage`:
 ## Database
 - Flyway migration: `src/main/resources/db/migration/V1__init_auth_users_audit.sql`
 - Flyway migration: `src/main/resources/db/migration/V2__init_academic_core.sql`
+- Flyway migration: `src/main/resources/db/migration/V3__init_enrollment_workflow.sql`
+- Flyway migration: `src/main/resources/db/migration/V4__init_exam_orchestration.sql`
 
 ## Run Locally
 1. Ensure PostgreSQL is running and accessible.
@@ -84,4 +87,4 @@ Package structure under `src/main/java/com/umanage`:
 
 ## Assumptions (for this milestone)
 - This milestone delivers foundational backend architecture and first core module only.
-- Domain modules like admissions, courses, timetable, exams, OMR, results, etc. will be added incrementally on top of this architecture.
+- Domain modules like admissions, timetable, and results will be added incrementally on top of this architecture.
