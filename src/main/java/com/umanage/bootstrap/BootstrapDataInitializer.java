@@ -48,10 +48,15 @@ public class BootstrapDataInitializer implements CommandLineRunner {
         var roleView = createPermissionIfMissing("ROLE_VIEW");
         var profileView = createPermissionIfMissing("PROFILE_VIEW");
         var profileManage = createPermissionIfMissing("PROFILE_MANAGE");
+        var academicView = createPermissionIfMissing("ACADEMIC_VIEW");
+        var academicManage = createPermissionIfMissing("ACADEMIC_MANAGE");
 
         var defaultUserPermissions = Set.of(profileView, profileManage);
 
-        var adminPermissions = Set.of(userManage, userView, roleManage, roleView, profileView, profileManage);
+        var adminPermissions = Set.of(
+                userManage, userView, roleManage, roleView,
+                profileView, profileManage, academicView, academicManage
+        );
 
         var adminRole = roleRepository.findByNameIgnoreCase("ADMIN").orElseGet(() -> {
             var role = new Role();

@@ -2,7 +2,7 @@
 
 ## Overview
 UManage is being developed as an enterprise-grade University Management System.
-This first milestone establishes the backend foundation and implements Authentication + Authorization + Users/Roles/Permissions.
+This milestone establishes the backend foundation and implements Authentication + Authorization + Users/Roles/Permissions + Academic Core.
 
 ## Tech Stack
 - Java 21
@@ -18,6 +18,7 @@ Package structure under `src/main/java/com/umanage`:
 - `security`: JWT, Spring Security config, auth filter, user details service
 - `auth`: login/refresh DTOs, controller, service, refresh token persistence
 - `users`: user/role/permission entities, repositories, services, mapper, controllers
+- `academic`: departments, programs, semesters, courses, offerings/sections, prerequisites, faculty assignments
 - `audit`: audit log entity/repository/service
 - `bootstrap`: startup seed for baseline admin + permissions
 
@@ -32,6 +33,20 @@ Package structure under `src/main/java/com/umanage`:
 - `GET /api/v1/users/{id}` (requires `USER_VIEW`)
 - `GET /api/v1/users/me` (requires `PROFILE_VIEW`)
 - `PUT /api/v1/users/me` (requires `PROFILE_MANAGE`)
+- `POST /api/v1/academic/departments` (requires `ACADEMIC_MANAGE`)
+- `GET /api/v1/academic/departments` (requires `ACADEMIC_VIEW`)
+- `POST /api/v1/academic/programs` (requires `ACADEMIC_MANAGE`)
+- `GET /api/v1/academic/programs` (requires `ACADEMIC_VIEW`)
+- `POST /api/v1/academic/semesters` (requires `ACADEMIC_MANAGE`)
+- `GET /api/v1/academic/semesters` (requires `ACADEMIC_VIEW`)
+- `POST /api/v1/academic/courses` (requires `ACADEMIC_MANAGE`)
+- `GET /api/v1/academic/courses` (requires `ACADEMIC_VIEW`)
+- `POST /api/v1/academic/offerings` (requires `ACADEMIC_MANAGE`)
+- `GET /api/v1/academic/offerings` (requires `ACADEMIC_VIEW`)
+- `POST /api/v1/academic/prerequisites` (requires `ACADEMIC_MANAGE`)
+- `GET /api/v1/academic/prerequisites` (requires `ACADEMIC_VIEW`)
+- `POST /api/v1/academic/faculty-assignments` (requires `ACADEMIC_MANAGE`)
+- `GET /api/v1/academic/faculty-assignments` (requires `ACADEMIC_VIEW`)
 
 ## Security Notes
 - JWT access and refresh tokens are both signed and validated.
@@ -45,6 +60,7 @@ Package structure under `src/main/java/com/umanage`:
 
 ## Database
 - Flyway migration: `src/main/resources/db/migration/V1__init_auth_users_audit.sql`
+- Flyway migration: `src/main/resources/db/migration/V2__init_academic_core.sql`
 
 ## Run Locally
 1. Ensure PostgreSQL is running and accessible.
