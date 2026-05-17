@@ -3,7 +3,9 @@ package com.umanage.users.service;
 import com.umanage.audit.service.AuditLogService;
 import com.umanage.common.exception.ConflictException;
 import com.umanage.common.exception.ResourceNotFoundException;
+import com.umanage.common.exception.UnauthorizedException;
 import com.umanage.users.dto.CreateUserRequest;
+import com.umanage.users.dto.UpdateProfileRequest;
 import com.umanage.users.entity.User;
 import com.umanage.security.AuthUserPrincipal;
 import com.umanage.users.repository.UserRepository;
@@ -72,11 +74,36 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
 
+    @Transactional(readOnly = true)
+    public User getMyProfile() {
+        return userRepository.findById(getActorUserIdRequired())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    }
+
+    @Transactional
+    public User updateMyProfile(UpdateProfileRequest request, HttpServletRequest httpRequest) {
+        var user = userRepository.findById(getActorUserIdRequired())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        user.setFirstName(request.firstName().trim());
+        user.setLastName(request.lastName().trim());
+        var saved = userRepository.save(user);
+        auditLogService.log(saved.getId(), "UPDATE_PROFILE", "User", saved.getId().toString(), "Updated own profile", httpRequest.getRemoteAddr());
+        return saved;
+    }
+
     private UUID getActorUserId() {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof AuthUserPrincipal principal) {
             return principal.getUserId();
         }
         return null;
+    }
+
+    private UUID getActorUserIdRequired() {
+        var userId = getActorUserId();
+        if (userId == null) {
+            throw new UnauthorizedException("Authentication required");
+        }
+        return userId;
     }
 }

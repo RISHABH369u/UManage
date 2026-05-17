@@ -2,6 +2,7 @@ package com.umanage.users.controller;
 
 import com.umanage.common.api.ApiResponse;
 import com.umanage.users.dto.CreateUserRequest;
+import com.umanage.users.dto.UpdateProfileRequest;
 import com.umanage.users.dto.UserResponse;
 import com.umanage.users.mapper.UserMapper;
 import com.umanage.users.service.UserService;
@@ -14,6 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -67,5 +69,18 @@ public class UserController {
     @PreAuthorize("hasAuthority('USER_VIEW')")
     public ResponseEntity<ApiResponse<UserResponse>> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.ok(userMapper.toUserResponse(userService.getUser(id))));
+    }
+
+    @GetMapping("/me")
+    @PreAuthorize("hasAuthority('PROFILE_VIEW')")
+    public ResponseEntity<ApiResponse<UserResponse>> myProfile() {
+        return ResponseEntity.ok(ApiResponse.ok(userMapper.toUserResponse(userService.getMyProfile())));
+    }
+
+    @PutMapping("/me")
+    @PreAuthorize("hasAuthority('PROFILE_MANAGE')")
+    public ResponseEntity<ApiResponse<UserResponse>> updateMyProfile(@Valid @RequestBody UpdateProfileRequest request,
+                                                                     HttpServletRequest httpRequest) {
+        return ResponseEntity.ok(ApiResponse.ok(userMapper.toUserResponse(userService.updateMyProfile(request, httpRequest))));
     }
 }

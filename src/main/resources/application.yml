@@ -20,6 +20,9 @@ server:
   port: ${SERVER_PORT:8080}
 
 app:
+  auth:
+    registration:
+      default-role: ${AUTH_REGISTRATION_DEFAULT_ROLE:USER}
   security:
     cors:
       allowed-origins:

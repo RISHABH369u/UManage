@@ -2,25 +2,33 @@ package com.umanage.auth.service;
 
 import com.umanage.audit.service.AuditLogService;
 import com.umanage.auth.dto.LoginRequest;
+import com.umanage.auth.dto.RegisterRequest;
 import com.umanage.auth.dto.RefreshRequest;
 import com.umanage.auth.dto.TokenResponse;
 import com.umanage.auth.entity.RefreshToken;
 import com.umanage.auth.repository.RefreshTokenRepository;
+import com.umanage.common.exception.ConflictException;
+import com.umanage.common.exception.ResourceNotFoundException;
 import com.umanage.common.exception.UnauthorizedException;
 import com.umanage.security.AuthUserPrincipal;
 import com.umanage.security.JwtProperties;
 import com.umanage.security.JwtService;
+import com.umanage.users.entity.User;
+import com.umanage.users.repository.RoleRepository;
 import com.umanage.users.repository.UserRepository;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
+import java.util.Set;
 import java.util.stream.StreamSupport;
 
 @Service
@@ -31,20 +39,51 @@ public class AuthService {
     private final JwtProperties jwtProperties;
     private final RefreshTokenRepository refreshTokenRepository;
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
     private final AuditLogService auditLogService;
+
+    @Value("${app.auth.registration.default-role:USER}")
+    private String defaultRegistrationRole;
 
     public AuthService(AuthenticationManager authenticationManager,
                        JwtService jwtService,
                        JwtProperties jwtProperties,
                        RefreshTokenRepository refreshTokenRepository,
                        UserRepository userRepository,
+                       RoleRepository roleRepository,
+                       PasswordEncoder passwordEncoder,
                        AuditLogService auditLogService) {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.jwtProperties = jwtProperties;
         this.refreshTokenRepository = refreshTokenRepository;
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
         this.auditLogService = auditLogService;
+    }
+
+    @Transactional
+    public User register(RegisterRequest request, HttpServletRequest httpRequest) {
+        var normalizedEmail = request.email().trim().toLowerCase();
+        if (userRepository.existsByEmailIgnoreCase(normalizedEmail)) {
+            throw new ConflictException("Email already exists");
+        }
+
+        var defaultRole = roleRepository.findByNameIgnoreCase(defaultRegistrationRole)
+                .orElseThrow(() -> new ResourceNotFoundException("Default role not found: " + defaultRegistrationRole));
+
+        var user = new User();
+        user.setEmail(normalizedEmail);
+        user.setPasswordHash(passwordEncoder.encode(request.password()));
+        user.setFirstName(request.firstName().trim());
+        user.setLastName(request.lastName().trim());
+        user.setRoles(Set.of(defaultRole));
+
+        var saved = userRepository.save(user);
+        auditLogService.log(saved.getId(), "REGISTER", "User", saved.getId().toString(), "User self-registered", httpRequest.getRemoteAddr());
+        return saved;
     }
 
     @Transactional

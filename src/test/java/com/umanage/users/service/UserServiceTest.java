@@ -3,16 +3,23 @@ package com.umanage.users.service;
 import com.umanage.audit.service.AuditLogService;
 import com.umanage.common.exception.ConflictException;
 import com.umanage.users.dto.CreateUserRequest;
+import com.umanage.users.dto.UpdateProfileRequest;
+import com.umanage.users.entity.User;
 import com.umanage.users.entity.Role;
+import com.umanage.security.AuthUserPrincipal;
 import com.umanage.users.repository.UserRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -41,6 +48,11 @@ class UserServiceTest {
     @BeforeEach
     void setUp() {
         userService = new UserService(userRepository, roleService, passwordEncoder, auditLogService);
+    }
+
+    @AfterEach
+    void clearSecurityContext() {
+        SecurityContextHolder.clearContext();
     }
 
     @Test
@@ -79,5 +91,46 @@ class UserServiceTest {
         assertThat(captor.getValue().getPasswordHash()).isEqualTo("encoded");
         assertThat(captor.getValue().getRoles()).hasSize(1);
         verify(auditLogService).log(any(), eq("CREATE_USER"), eq("User"), any(), any(), any());
+    }
+
+    @Test
+    void getMyProfileShouldReturnAuthenticatedUser() {
+        UUID userId = UUID.randomUUID();
+        var principal = new AuthUserPrincipal(userId, "user@u.com", "hash", true, Set.of());
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities())
+        );
+
+        var user = new User();
+        user.setId(userId);
+        user.setEmail("user@u.com");
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        var result = userService.getMyProfile();
+        assertThat(result.getId()).isEqualTo(userId);
+    }
+
+    @Test
+    void updateMyProfileShouldPersistFirstAndLastName() {
+        UUID userId = UUID.randomUUID();
+        var principal = new AuthUserPrincipal(userId, "user@u.com", "hash", true, Set.of());
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities())
+        );
+
+        var user = new User();
+        user.setId(userId);
+        user.setFirstName("Old");
+        user.setLastName("Name");
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0, User.class));
+
+        var servletRequest = mock(jakarta.servlet.http.HttpServletRequest.class);
+        when(servletRequest.getRemoteAddr()).thenReturn("127.0.0.1");
+
+        var updated = userService.updateMyProfile(new UpdateProfileRequest(" New ", " User "), servletRequest);
+        assertThat(updated.getFirstName()).isEqualTo("New");
+        assertThat(updated.getLastName()).isEqualTo("User");
+        verify(auditLogService).log(eq(userId), eq("UPDATE_PROFILE"), eq("User"), eq(userId.toString()), any(), eq("127.0.0.1"));
     }
 }

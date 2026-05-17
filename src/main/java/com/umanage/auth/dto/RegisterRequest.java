@@ -1,14 +1,11 @@
-package com.umanage.users.dto;
+package com.umanage.auth.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-import java.util.Set;
-
-public record CreateUserRequest(
+public record RegisterRequest(
         @Email(message = "Valid email is required")
         @NotBlank(message = "Email is required")
         String email,
@@ -22,16 +19,13 @@ public record CreateUserRequest(
         String password,
 
         @NotBlank(message = "First name is required")
-        @Size(max = 100, message = "First name must be at most 100 chars")
+        @Size(max = 100, message = "First name must be at most 100 characters")
         @Pattern(regexp = "^[\\p{L} .'-]+$", message = "First name contains invalid characters")
         String firstName,
 
         @NotBlank(message = "Last name is required")
-        @Size(max = 100, message = "Last name must be at most 100 chars")
+        @Size(max = 100, message = "Last name must be at most 100 characters")
         @Pattern(regexp = "^[\\p{L} .'-]+$", message = "Last name contains invalid characters")
-        String lastName,
-
-        @NotEmpty(message = "At least one role is required")
-        Set<String> roles
+        String lastName
 ) {
 }
