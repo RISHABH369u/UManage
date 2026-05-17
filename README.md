@@ -23,12 +23,15 @@ Package structure under `src/main/java/com/umanage`:
 
 ## Implemented API Endpoints (v1)
 - `POST /api/v1/auth/login`
+- `POST /api/v1/auth/register`
 - `POST /api/v1/auth/refresh`
 - `POST /api/v1/roles` (requires `ROLE_MANAGE`)
 - `GET /api/v1/roles` (requires `ROLE_VIEW`)
 - `POST /api/v1/users` (requires `USER_MANAGE`)
 - `GET /api/v1/users` (requires `USER_VIEW`)
 - `GET /api/v1/users/{id}` (requires `USER_VIEW`)
+- `GET /api/v1/users/me` (requires `PROFILE_VIEW`)
+- `PUT /api/v1/users/me` (requires `PROFILE_MANAGE`)
 
 ## Security Notes
 - JWT access and refresh tokens are both signed and validated.
@@ -37,6 +40,7 @@ Package structure under `src/main/java/com/umanage`:
 - Configure environment variables in non-local environments:
   - `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`
   - `JWT_SECRET`, `JWT_ISSUER`, `JWT_ACCESS_EXPIRY_MINUTES`, `JWT_REFRESH_EXPIRY_DAYS`
+  - `AUTH_REGISTRATION_DEFAULT_ROLE`
   - `BOOTSTRAP_ADMIN_EMAIL`, `BOOTSTRAP_ADMIN_PASSWORD`
 
 ## Database

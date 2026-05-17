@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
+import java.util.HashSet;
 
 @Component
 public class BootstrapDataInitializer implements CommandLineRunner {
@@ -45,14 +46,30 @@ public class BootstrapDataInitializer implements CommandLineRunner {
         var userView = createPermissionIfMissing("USER_VIEW");
         var roleManage = createPermissionIfMissing("ROLE_MANAGE");
         var roleView = createPermissionIfMissing("ROLE_VIEW");
+        var profileView = createPermissionIfMissing("PROFILE_VIEW");
+        var profileManage = createPermissionIfMissing("PROFILE_MANAGE");
+
+        var defaultUserPermissions = Set.of(profileView, profileManage);
+
+        var adminPermissions = Set.of(userManage, userView, roleManage, roleView, profileView, profileManage);
 
         var adminRole = roleRepository.findByNameIgnoreCase("ADMIN").orElseGet(() -> {
             var role = new Role();
             role.setName("ADMIN");
             role.setDescription("System administrator role");
-            role.setPermissions(Set.of(userManage, userView, roleManage, roleView));
+            role.setPermissions(new HashSet<>(adminPermissions));
             return roleRepository.save(role);
         });
+        mergePermissionsIfMissing(adminRole, adminPermissions);
+
+        var userRole = roleRepository.findByNameIgnoreCase("USER").orElseGet(() -> {
+            var role = new Role();
+            role.setName("USER");
+            role.setDescription("Default user role");
+            role.setPermissions(new HashSet<>(defaultUserPermissions));
+            return roleRepository.save(role);
+        });
+        mergePermissionsIfMissing(userRole, defaultUserPermissions);
 
         if (!userRepository.existsByEmailIgnoreCase(adminEmail)) {
             var admin = new User();
@@ -72,5 +89,13 @@ public class BootstrapDataInitializer implements CommandLineRunner {
             permission.setDescription("System permission " + name);
             return permissionRepository.save(permission);
         });
+    }
+
+    private void mergePermissionsIfMissing(Role role, Set<Permission> requiredPermissions) {
+        var currentPermissions = new HashSet<>(role.getPermissions());
+        if (currentPermissions.addAll(requiredPermissions)) {
+            role.setPermissions(currentPermissions);
+            roleRepository.save(role);
+        }
     }
 }

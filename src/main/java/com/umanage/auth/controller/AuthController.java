@@ -1,10 +1,13 @@
 package com.umanage.auth.controller;
 
 import com.umanage.auth.dto.LoginRequest;
+import com.umanage.auth.dto.RegisterRequest;
 import com.umanage.auth.dto.RefreshRequest;
 import com.umanage.auth.dto.TokenResponse;
 import com.umanage.auth.service.AuthService;
 import com.umanage.common.api.ApiResponse;
+import com.umanage.users.dto.UserResponse;
+import com.umanage.users.mapper.UserMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -18,9 +21,18 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
+    private final UserMapper userMapper;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, UserMapper userMapper) {
         this.authService = authService;
+        this.userMapper = userMapper;
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<ApiResponse<UserResponse>> register(@Valid @RequestBody RegisterRequest request,
+                                                              HttpServletRequest httpRequest) {
+        var created = authService.register(request, httpRequest);
+        return ResponseEntity.ok(ApiResponse.ok(userMapper.toUserResponse(created)));
     }
 
     @PostMapping("/login")
