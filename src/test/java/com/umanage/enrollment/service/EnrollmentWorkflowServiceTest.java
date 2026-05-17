@@ -65,7 +65,6 @@ class EnrollmentWorkflowServiceTest {
                 userRepository,
                 auditLogService
         );
-        when(httpServletRequest.getRemoteAddr()).thenReturn("127.0.0.1");
     }
 
     @AfterEach
@@ -160,6 +159,7 @@ class EnrollmentWorkflowServiceTest {
         when(enrollmentRecordRepository.countByCourseOfferingIdAndStatus(offeringId, EnrollmentStatus.ACTIVE)).thenReturn(1L);
         when(enrollmentRecordRepository.findByStudentUserIdAndCourseOfferingId(studentId, offeringId)).thenReturn(Optional.of(existingRecord));
         when(enrollmentRequestRepository.save(any(EnrollmentRequest.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(httpServletRequest.getRemoteAddr()).thenReturn("127.0.0.1");
 
         var approved = enrollmentWorkflowService.approveRequest(requestId, "ok", httpServletRequest);
 
@@ -197,6 +197,7 @@ class EnrollmentWorkflowServiceTest {
         when(enrollmentRequestRepository.findByIdAndStatus(requestId, EnrollmentRequestStatus.PENDING)).thenReturn(Optional.of(pending));
         when(enrollmentRecordRepository.findByStudentUserIdAndCourseOfferingId(studentId, offeringId)).thenReturn(Optional.of(activeRecord));
         when(enrollmentRequestRepository.save(any(EnrollmentRequest.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(httpServletRequest.getRemoteAddr()).thenReturn("127.0.0.1");
 
         var approved = enrollmentWorkflowService.approveRequest(requestId, null, httpServletRequest);
 
