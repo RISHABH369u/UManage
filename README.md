@@ -19,6 +19,7 @@ Package structure under `src/main/java/com/umanage`:
 - `auth`: login/refresh DTOs, controller, service, refresh token persistence
 - `users`: user/role/permission entities, repositories, services, mapper, controllers
 - `academic`: departments, programs, semesters, courses, offerings/sections, prerequisites, faculty assignments
+- `enrollment`: enrollment requests, approvals/rejections, registrations, student/admin workflows
 - `audit`: audit log entity/repository/service
 - `bootstrap`: startup seed for baseline admin + permissions
 
@@ -47,6 +48,12 @@ Package structure under `src/main/java/com/umanage`:
 - `GET /api/v1/academic/prerequisites` (requires `ACADEMIC_VIEW`)
 - `POST /api/v1/academic/faculty-assignments` (requires `ACADEMIC_MANAGE`)
 - `GET /api/v1/academic/faculty-assignments` (requires `ACADEMIC_VIEW`)
+- `POST /api/v1/enrollment/requests` (requires `ENROLLMENT_REQUEST`)
+- `GET /api/v1/enrollment/requests/me` (requires `ENROLLMENT_VIEW`)
+- `GET /api/v1/enrollment/registrations/me` (requires `ENROLLMENT_VIEW`)
+- `GET /api/v1/enrollment/requests/pending` (requires `ENROLLMENT_APPROVE`)
+- `POST /api/v1/enrollment/requests/{id}/approve` (requires `ENROLLMENT_APPROVE`)
+- `POST /api/v1/enrollment/requests/{id}/reject` (requires `ENROLLMENT_APPROVE`)
 
 ## Security Notes
 - JWT access and refresh tokens are both signed and validated.

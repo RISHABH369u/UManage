@@ -50,13 +50,19 @@ public class BootstrapDataInitializer implements CommandLineRunner {
         var profileManage = createPermissionIfMissing("PROFILE_MANAGE");
         var academicView = createPermissionIfMissing("ACADEMIC_VIEW");
         var academicManage = createPermissionIfMissing("ACADEMIC_MANAGE");
+        var enrollmentRequest = createPermissionIfMissing("ENROLLMENT_REQUEST");
+        var enrollmentView = createPermissionIfMissing("ENROLLMENT_VIEW");
+        var enrollmentApprove = createPermissionIfMissing("ENROLLMENT_APPROVE");
 
-        var defaultUserPermissions = Set.of(profileView, profileManage);
+        var defaultUserPermissions = Set.of(profileView, profileManage, enrollmentRequest, enrollmentView);
 
         var adminPermissions = Set.of(
                 userManage, userView, roleManage, roleView,
-                profileView, profileManage, academicView, academicManage
+                profileView, profileManage, academicView, academicManage,
+                enrollmentRequest, enrollmentView, enrollmentApprove
         );
+
+        var registrarPermissions = Set.of(enrollmentView, enrollmentApprove);
 
         var adminRole = roleRepository.findByNameIgnoreCase("ADMIN").orElseGet(() -> {
             var role = new Role();
@@ -75,6 +81,15 @@ public class BootstrapDataInitializer implements CommandLineRunner {
             return roleRepository.save(role);
         });
         mergePermissionsIfMissing(userRole, defaultUserPermissions);
+
+        var registrarRole = roleRepository.findByNameIgnoreCase("REGISTRAR").orElseGet(() -> {
+            var role = new Role();
+            role.setName("REGISTRAR");
+            role.setDescription("Registrar role for enrollment approvals");
+            role.setPermissions(new HashSet<>(registrarPermissions));
+            return roleRepository.save(role);
+        });
+        mergePermissionsIfMissing(registrarRole, registrarPermissions);
 
         if (!userRepository.existsByEmailIgnoreCase(adminEmail)) {
             var admin = new User();
